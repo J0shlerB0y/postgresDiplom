@@ -100,6 +100,16 @@ static relopt_bool boolRelOpts[] =
 {
 	{
 		{
+			"encryption",
+			"page level encryption",
+			RELOPT_KIND_HEAP,
+			ShareUpdateExclusiveLock
+
+		},
+		false
+	},
+	{
+		{
 			"autosummarize",
 			"Enables automatic summarization on this BRIN index",
 			RELOPT_KIND_BRIN,
@@ -2075,6 +2085,8 @@ bytea *
 default_reloptions(Datum reloptions, bool validate, relopt_kind kind)
 {
 	static const relopt_parse_elt tab[] = {
+		{"encryption", RELOPT_TYPE_BOOL, offsetof(StdRdOptions, encryption)},
+
 		{"fillfactor", RELOPT_TYPE_INT, offsetof(StdRdOptions, fillfactor)},
 		{"autovacuum_enabled", RELOPT_TYPE_BOOL,
 		offsetof(StdRdOptions, autovacuum) + offsetof(AutoVacOpts, enabled)},

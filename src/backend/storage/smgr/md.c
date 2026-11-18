@@ -785,6 +785,26 @@ mdprefetch(SMgrRelation reln, ForkNumber forknum, BlockNumber blocknum,
 	return true;
 }
 
+void xor_buffer(void *dst, size_t len) ;
+void xor_buffer(void *dst, size_t len) {
+    uint8_t *d = dst;
+
+    for (size_t i = 0; i < len; i++) {
+        d[i] ^= d[i];
+    }
+}
+
+bool is_zero_filled(const void *buf, size_t len) ;
+bool is_zero_filled(const void *buf, size_t len) {
+    const unsigned char *p = buf;
+
+    for (size_t i = 0; i < len; i++) {
+        if (p[i] != 0)
+            return false;
+    }
+    return true;
+}
+
 /*
  * Convert an array of buffer address into an array of iovec objects, and
  * return the number that were required.  'iov' must have enough space for up
