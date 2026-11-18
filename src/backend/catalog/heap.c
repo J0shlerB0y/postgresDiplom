@@ -78,6 +78,8 @@
 #include "utils/lsyscache.h"
 #include "utils/syscache.h"
 
+#include "storage/enc.h"
+
 
 /* Potentially set by pg_upgrade_support functions */
 Oid			binary_upgrade_next_heap_pg_class_oid = InvalidOid;
@@ -1622,6 +1624,25 @@ heap_create_with_catalog(const char *relname,
 	 * upgrade.  The storage we create here will be replaced later, but we
 	 * need to have something on disk in the meanwhile.
 	 */
+
+	if(relkind == RELKIND_RELATION){
+		StdRdOptions *stdRdOptions = (StdRdOptions*)heap_reloptions(relkind, reloptions, true);
+
+		if(stdRdOptions){
+			if(stdRdOptions -> encryption == true){
+				Oid tsp = (reltablespace == InvalidOid ? MyDatabaseTableSpace : reltablespace);
+				char backendid = (relpersistence == RELPERSISTENCE_TEMP ? MyProcNumber : INVALID_PROC_NUMBER);
+				RelPathStr fname_rel = GetRelationPath(MyDatabaseId, tsp, relid, backendid, MAIN_FORKNUM);
+				char *enc_signal_filename;
+				enc_signal_filename = psprintf("%s.%s.blockmap", fname_rel.str, ".enc");
+
+				enc_create_signal_file(enc_signal_filename);
+
+				pfree(enc_signal_filename);
+			}
+		}
+	}
+
 	new_rel_desc = heap_create(relname,
 							   relnamespace,
 							   reltablespace,
